@@ -1,0 +1,98 @@
+// Naive Approach
+
+#include <iostream>
+using namespace std;
+
+// Naive recursive approach
+int naivePower(int x, int n) {
+    if (x == 0) {
+        return 0;
+    }
+    if (n == 0) {
+        return 1;
+    }
+    return x * naivePower(x, n - 1);  // Multiply x by itself n times
+}
+
+int main() {
+    int x, n;
+
+    cout << "Enter base number (x): ";
+    cin >> x;
+    cout << "Enter exponent (n): ";
+    cin >> n;
+
+    // Test the naive power function
+    cout << "Naive Power: " << naivePower(x, n) << endl;
+
+    return 0;
+}
+
+// Unoptimized Divide and Conquer Approach
+
+#include <iostream>
+using namespace std;
+
+// Unoptimized Divide and Conquer Approach
+int unoptimizedDCPower(int x, int n) {
+    if (x == 0) {
+        return 0;
+    }
+    if (n == 0) {
+        return 1;
+    }
+    if (n % 2 == 0) {
+        return unoptimizedDCPower(x, n / 2) * unoptimizedDCPower(x, n / 2);
+    } else {
+        return x * unoptimizedDCPower(x, n / 2) * unoptimizedDCPower(x, n / 2);
+    }
+}
+
+int main() {
+    int x, n;
+
+    cout << "Enter base number (x): ";
+    cin >> x;
+    cout << "Enter exponent (n): ";
+    cin >> n;
+
+    // Test the unoptimized divide and conquer power function
+    cout << "Unoptimized D&C Power: " << unoptimizedDCPower(x, n) << endl;
+
+    return 0;
+}
+
+// Optimized Divide and Conquer Approach
+#include <iostream>
+using namespace std;
+
+// Optimized Divide and Conquer approach
+int optimizedDCPower(int x, int n) {
+    if (x == 0) {
+        return 0;
+    }
+    if (n == 0) {
+        return 1;
+    }
+
+    int temp = optimizedDCPower(x, n / 2);  // Compute the power of half n
+    if (n % 2 == 0) {
+        return temp * temp;  // If n is even, square the result
+    } else {
+        return x * temp * temp;  // If n is odd, multiply by x once more
+    }
+}
+
+int main() {
+    int x, n;
+
+    cout << "Enter base number (x): ";
+    cin >> x;
+    cout << "Enter exponent (n): ";
+    cin >> n;
+
+    // Test the optimized divide and conquer power function
+    cout << "Optimized D&C Power: " << optimizedDCPower(x, n) << endl;
+
+    return 0;
+}
