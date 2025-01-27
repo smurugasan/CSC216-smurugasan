@@ -1,0 +1,53 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+#include <iomanip>
+
+using namespace std;
+
+int randomWalk(int N) {
+    int currentPosition = 0;
+    for (int i = 0; i < N; i++) {
+        int flip = rand() % 2;
+        if (flip == 0) {
+            currentPosition--;
+        } else {
+            currentPosition++;
+        }
+    }
+    return currentPosition;
+}
+
+void runSimulation(int maxSteps, int trials) {
+    vector<vector<int>> results;
+    for (int N = 10; N <= maxSteps; N += 10) {
+        vector<int> finalPositions;
+        for (int trial = 1; trial <= trials; trial++) {
+            int finalPosition = randomWalk(N);
+            finalPositions.push_back(finalPosition);
+        }
+        results.push_back(finalPositions);
+    }
+
+    cout << "Number of Steps (N)\tTrial Number (M)\tFinal Position (D)" << endl;
+    for (int N = 10, i = 0; N <= maxSteps; N += 10, i++) {
+        for (int trial = 0; trial < trials; trial++) {
+            cout << N << "\t\t" << trial + 1 << "\t\t\t" << results[i][trial] << endl;
+        }
+    }
+}
+
+int main() {
+    srand(time(0));
+    
+    int maxSteps, trials;
+    cout << "Enter the maximum number of steps (N): ";
+    cin >> maxSteps;
+    cout << "Enter the number of trials (M): ";
+    cin >> trials;
+
+    runSimulation(maxSteps, trials);
+
+    return 0;
+}
