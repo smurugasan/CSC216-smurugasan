@@ -1,4 +1,5 @@
 //1st shuffle algorithm
+
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -42,7 +43,131 @@ int main() {
     for (int num : shuffledArr) {
         cout << num << " ";
     }
+
     cout << endl;
 
     return 0;
 }
+//Results of 1st method
+Testing array of size 100
+Time taken for 4 trials: 85 microseconds = 0.085 ms
+
+Testing array of size 1000
+Time taken for 4 trials: 778 microseconds 0.778 ms
+
+Testing array of size 10000
+Time taken for 4 trials: 12320 microseconds = 12.32 ms
+
+Testing array of size 100000
+Time taken for 4 trials: 1094215 microseconds = 1094.215 ms
+
+//2nd shuffle algorithm
+
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+vector<int> shuffle(vector<int>& array) {
+    vector<int> copy;
+    int n = array.size();
+
+    while (n) {
+        int i = rand() % n--;  
+        
+
+        copy.push_back(array[i]);
+        array.erase(array.begin() + i);
+    }
+
+    return copy;
+}
+
+int main() {
+    srand(time(0));
+
+    int numElements;
+    cout << "Enter the number of elements: ";
+    cin >> numElements;
+
+    vector<int> arr(numElements);
+
+    cout << "Enter " << numElements << " values:" << endl;
+    for (int i = 0; i < numElements; ++i) {
+        cin >> arr[i];
+    }
+
+    vector<int> shuffledArr = shuffle(arr);
+    cout << "Shuffled array: ";
+    for (int num : shuffledArr) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
+//Results of 2nd method
+Testing array of size 100
+Time taken for 4 trials: 134 microseconds = .134 ms
+
+Testing array of size 1000
+Time taken for 4 trials: 1413 microseconds = 1.413 ms
+
+Testing array of size 10000
+Time taken for 4 trials: 23348 microseconds = 23.348 ms
+
+Testing array of size 100000
+Time taken for 4 trials: 866282 microseconds 866.282 ms
+
+//3rd shuffle algorithm
+
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+void shuffle(vector<int>& array) {
+    for (int m = array.size(); m > 0; m--) {
+        int i = rand() % m;
+        swap(array[m - 1], array[i]);
+    }
+}
+
+int main() {
+    srand(time(0)); 
+
+    int n;
+    cout << "Enter the number of elements: ";
+    cin >> n;
+
+    vector<int> array(n);
+
+    cout << "Enter " << n << " elements:\n";
+    for (int i = 0; i < n; i++) {
+        cin >> array[i];
+    }
+
+    shuffle(array);
+
+    cout << "Shuffled array: ";
+    for (int num : array) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
+//Results for 3rd method
+Testing array size: 100
+Average time: 2 microseconds = 0.002 ms
+
+Testing array size: 1000
+Average time: 26 microseconds 0.026 ms
+
+Testing array size: 10000
+Average time: 272 microseconds 0.272 ms
+
+Testing array size: 100000
+Average time: 2785 microseconds 2.785 ms
