@@ -1,0 +1,48 @@
+//1st shuffle algorithm
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+vector<int> shuffle(vector<int>& array) {
+    vector<int> copy;
+    int n = array.size();
+
+    while (n) {
+        int i = rand() % array.size();
+
+        if (i < array.size()) {
+            copy.push_back(array[i]);
+            array.erase(array.begin() + i);
+            n--;
+        }
+    }
+
+    return copy;
+}
+
+int main() {
+    srand(time(0));
+
+    int n;
+    cout << "Enter the number of elements: ";
+    cin >> n;
+
+    vector<int> arr(n);
+
+    cout << "Enter " << n << " values:" << endl;
+    for (int i = 0; i < n; ++i) {
+        cin >> arr[i];
+    }
+
+    vector<int> shuffledArr = shuffle(arr);
+
+    cout << "Shuffled array: ";
+    for (int num : shuffledArr) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
