@@ -1,0 +1,103 @@
+#include <iostream>
+#include <stack>
+#include <string>
+#include <cctype>
+#include <sstream>
+#include <stdexcept>
+using namespace std;
+
+class Calculator {
+public:
+    double evaluate(const string& expression) {
+        string postfix = infixToPostfix(expression);
+        return evaluatePostfix(postfix);
+    }
+
+private:
+    string infixToPostfix(const string& infix) {
+        stack<char> operators;
+        stringstream output;
+
+        for (size_t i = 0; i < infix.length(); ++i) {
+            char token = infix[i];
+
+            if (isdigit(token)) {
+                output << token;
+                while (i + 1 < infix.length() && isdigit(infix[i + 1])) {
+                    output << infix[++i];
+                }
+                output << " ";
+            } else if (token == '+' || token == '-' || token == '*' || token == '/') {
+                while (!operators.empty() && operators.top() != '(') {
+                    output << operators.top() << " ";
+                    operators.pop();
+                }
+                operators.push(token);
+            } else if (token == '(') {
+                operators.push(token);
+            } else if (token == ')') {
+                while (!operators.empty() && operators.top() != '(') {
+                    output << operators.top() << " ";
+                    operators.pop();
+                }
+                operators.pop();
+            }
+        }
+
+        while (!operators.empty()) {
+            output << operators.top() << " ";
+            operators.pop();
+        }
+
+        return output.str();
+    }
+
+    double evaluatePostfix(const string& postfix) {
+        stack<double> stack;
+        stringstream ss(postfix);
+        string token;
+
+        while (ss >> token) {
+            if (isdigit(token[0])) {
+                stack.push(stod(token));
+            } else {
+                double b = stack.top();
+                stack.pop();
+                double a = stack.top();
+                stack.pop();
+
+                switch (token[0]) {
+                    case '+': stack.push(a + b); break;
+                    case '-': stack.push(a - b); break;
+                    case '*': stack.push(a * b); break;
+                    case '/':
+                        if (b == 0) throw invalid_argument("Error (dividing by zero)");
+                        stack.push(a / b); break;
+                    default: throw invalid_argument("Invalid");
+                }
+            }
+        }
+
+        return stack.top();
+    }
+};
+
+int main() {
+    Calculator calc;
+    string expression;
+
+    cout << "Enter an expression: ";
+    getline(cin, expression);
+
+    try {
+        double result = calc.evaluate(expression);
+        cout << "Answer: " << result << endl;
+    } catch (const exception& e) {
+        cout << "Error: " << e.what() << endl;
+    }
+
+    return 0;
+}
+//Example
+Enter an expression: (0*7)+9
+Answer: 9
