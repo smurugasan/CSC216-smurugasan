@@ -1,0 +1,175 @@
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+#include <string>
+
+using namespace std;
+
+class Job
+{
+private:
+    string name;
+    int priority;
+
+public:
+    Job(string n, int p) : name(n), priority(p) {}
+
+    void execute()
+    {
+        cout << "Running the job with name " << name << " and priority " << priority << endl;
+    }
+
+    string getName()
+    {
+        return name;
+    }
+
+    int getPriority()
+    {
+        return priority;
+    }
+
+    bool operator<(const Job &other) const
+    {
+        return priority < other.priority;
+    }
+
+    bool operator>(const Job &other) const
+    {
+        return priority > other.priority;
+    }
+};
+
+template <typename T>
+class MaxHeap
+{
+private:
+    vector<T> heap;
+
+    void bubbleUp(int index)
+    {
+        while (index > 0 && heap[(index - 1) / 2] < heap[index])
+        {
+            swap(heap[(index - 1) / 2], heap[index]);
+            index = (index - 1) / 2;
+        }
+    }
+
+    void bubbleDown(int index)
+    {
+        int left = 2 * index + 1;
+        int right = 2 * index + 2;
+        int largest = index;
+
+        if (left < heap.size() && heap[left] > heap[largest])
+            largest = left;
+        if (right < heap.size() && heap[right] > heap[largest])
+            largest = right;
+        if (largest != index)
+        {
+            swap(heap[index], heap[largest]);
+            bubbleDown(largest);
+        }
+    }
+
+public:
+    void insert(T value)
+    {
+        heap.push_back(value);
+        bubbleUp(heap.size() - 1);
+    }
+
+    T extractMax()
+    {
+        if (heap.empty())
+            throw out_of_range("Heap is empty");
+        T maxValue = heap[0];
+        heap[0] = heap.back();
+        heap.pop_back();
+        bubbleDown(0);
+        return maxValue;
+    }
+
+    int size() const
+    {
+        return heap.size();
+    }
+};
+
+template <typename T>
+class PriorityQueue
+{
+private:
+    MaxHeap<T> heap;
+
+public:
+    void insert(T item)
+    {
+        heap.insert(item);
+    }
+
+    T extractMax()
+    {
+        return heap.extractMax();
+    }
+
+    int size() const
+    {
+        return heap.size();
+    }
+};
+
+class JobQueue
+{
+private:
+    PriorityQueue<Job> pq;
+
+public:
+    void insert(Job job)
+    {
+        pq.insert(job);
+    }
+
+    void runHighestPriority()
+    {
+        if (pq.size() == 0)
+        {
+            cout << "No jobs available." << endl;
+            return;
+        }
+
+        Job job = pq.extractMax();
+        job.execute();
+    }
+};
+
+int main()
+{
+    JobQueue jq;
+
+    Job j1("Task 1", 3);
+    Job j2("Task 2", 5);
+    Job j3("Task 3", 1);
+    Job j4("Task 4", 7);
+    Job j5("Task 5", 2);
+    Job j6("Task 6", 6);
+
+
+    jq.insert(j1);
+    jq.insert(j2);
+    jq.insert(j3);
+    jq.insert(j4);
+    jq.insert(j5);
+    jq.insert(j6);
+
+
+    jq.runHighestPriority();
+    jq.runHighestPriority();
+    jq.runHighestPriority();
+    jq.runHighestPriority();
+    jq.runHighestPriority();
+    jq.runHighestPriority();
+
+
+    return 0;
+}
