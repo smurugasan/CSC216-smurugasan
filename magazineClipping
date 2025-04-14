@@ -35,12 +35,12 @@ int main() {
     vector<string> articles;
     string line;
 
-    cout << "Enter the message you want to create:\n> ";
+    cout << "Enter message:\n> ";
     getline(cin, message);
 
-    cout << "\nEnter articles (type END to finish):\n";
+    cout << "\nEnter articles (type END to stop):\n";
     while (true) {
-        cout << "> ";
+        cout << " ";
         getline(cin, line);
         if (line == "END") {
             break;
@@ -56,3 +56,4 @@ int main() {
 
     return 0;
 }
+
