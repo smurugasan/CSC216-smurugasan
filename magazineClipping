@@ -1,0 +1,58 @@
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <cctype>
+#include <string>
+using namespace std;
+
+bool canMakeMessage(string message, vector<string> articles) {
+    unordered_map<char, int> letters;
+
+    for (string article : articles) {
+        for (char ch : article) {
+            if (!isspace(ch)) {
+                ch = tolower(ch);
+                letters[ch]++;
+            }
+        }
+    }
+
+    for (char ch : message) {
+        if (!isspace(ch)) {
+            ch = tolower(ch);
+            if (letters[ch] == 0) {
+                return false;
+            }
+            letters[ch]--;
+        }
+    }
+
+    return true;
+}
+
+int main() {
+    string message;
+    vector<string> articles;
+    string line;
+
+    cout << "Enter the message you want to create:\n> ";
+    getline(cin, message);
+
+    cout << "\nEnter articles (type END to finish):\n";
+    while (true) {
+        cout << "> ";
+        getline(cin, line);
+        if (line == "END") {
+            break;
+        }
+        articles.push_back(line);
+    }
+
+    if (canMakeMessage(message, articles)) {
+        cout << "\nResult: true\n";
+    } else {
+        cout << "\nResult: false\n";
+    }
+
+    return 0;
+}
