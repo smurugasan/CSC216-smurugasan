@@ -1,0 +1,79 @@
+#include <iostream>
+#include <fstream>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <algorithm>
+#include <cctype>
+using namespace std;
+
+bool isCommonWord(const string& word) {
+    static const unordered_set<string> commonWords = {
+        "a", "i", "and", "the", "to", "for", "they", "as", "their", "of", "on", "at", "is", "an", "with", "that", "as", "by"
+    };
+    return commonWords.find(word) != commonWords.end();
+}
+
+string cleanWord(const string& word) {
+    string result;
+    for (char ch : word) {
+        if (isalnum(ch)) {
+            result += tolower(ch);
+        }
+    }
+    return (result.empty() || isCommonWord(result)) ? "" : result;
+}
+
+void buildInvertedIndex(const string& inputFileName, const string& outputFileName) {
+    ifstream inFile(inputFileName);
+    if (!inFile) {
+        cerr << "Error: Cannot open input file '" << inputFileName << "'." << endl;
+        return;
+    }
+
+    unordered_map<string, vector<int>> index;
+    string word;
+    int position = 0;
+
+    while (inFile >> word) {
+        string cleaned = cleanWord(word);
+        if (!cleaned.empty()) {
+            index[cleaned].push_back(position);
+        }
+        ++position;
+    }
+    inFile.close();
+
+    ofstream outFile(outputFileName);
+    if (!outFile) {
+        cerr << "Error: Cannot open output file '" << outputFileName << "'." << endl;
+        return;
+    }
+
+    outFile << "{" << endl;
+    for (auto it = index.begin(); it != index.end(); ++it) {
+        outFile << "  \"" << it->first << "\": [";
+        for (size_t i = 0; i < it->second.size(); ++i) {
+            outFile << it->second[i];
+            if (i + 1 < it->second.size()) outFile << ", ";
+        }
+        outFile << "]";
+        if (next(it) != index.end()) outFile << ",";
+        outFile << endl;
+    }
+    outFile << "}" << endl;
+    outFile.close();
+}
+
+int main() {
+    string inputFileName, outputFileName;
+    cout << "Enter input filename: ";
+    cin >> inputFileName;
+    cout << "Enter output filename: ";
+    cin >> outputFileName;
+    buildInvertedIndex(inputFileName, outputFileName);
+    cout << "Inverted index written to '" << outputFileName
+         << "' from '" << inputFileName << "'." << endl;
+
+    return 0;
+}
