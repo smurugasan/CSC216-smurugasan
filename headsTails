@@ -1,0 +1,43 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+#include <iomanip>
+using namespace std;
+
+int countHeads(int flips, float probabilityOfHeads) {
+    int heads = 0;
+    for (int i = 0; i < flips; i++) {
+        float randomNumber = static_cast<float>(rand()) / RAND_MAX;
+        if (randomNumber < probabilityOfHeads) {
+            heads++;
+        }
+    }
+    return heads;
+}
+
+void runSimulation(const vector<int>& flipCounts, const vector<float>& probabilities, int trials) {
+    cout << fixed << setprecision(2);
+    cout << "Flips\tProb\tTrial\tHeads" << endl;
+
+    for (float prob : probabilities) {
+        for (int flips : flipCounts) {
+            for (int trial = 1; trial <= trials; trial++) {
+                int heads = countHeads(flips, prob);
+                cout << flips << "\t" << prob << "\t" << trial << "\t" << heads << endl;
+            }
+        }
+    }
+}
+
+int main() {
+    srand(static_cast<unsigned int>(time(0)));
+
+    vector<int> flipCounts = {10, 50, 100}; //m
+    vector<float> probabilities = {0.25f, 0.5f, 0.75f}; //p
+    int trialsPerSetting = 10; //n
+
+    runSimulation(flipCounts, probabilities, trialsPerSetting);
+
+    return 0;
+}
