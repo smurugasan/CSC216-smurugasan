@@ -1,0 +1,135 @@
+#include <iostream>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <queue>
+#include <sstream>
+#include <string>
+using namespace std;
+
+struct Node {
+    char ch;
+    int freq;
+    Node* left;
+    Node* right;
+    Node(char c, int f) : ch(c), freq(f), left(nullptr), right(nullptr) {}
+};
+
+struct Compare {
+    bool operator()(Node* a, Node* b) {
+        return a->freq > b->freq;
+    }
+};
+
+void makeCodes(Node* root, string code, unordered_map<char, string>& codeMap) {
+    if (!root) return;
+    if (!root->left && !root->right) {
+        codeMap[root->ch] = code;
+    }
+    makeCodes(root->left, code + "0", codeMap);
+    makeCodes(root->right, code + "1", codeMap);
+}
+
+void deleteTree(Node* root) {
+    if (!root) return;
+    deleteTree(root->left);
+    deleteTree(root->right);
+    delete root;
+}
+
+bool isCommonWord(const string& word) {
+    static const unordered_set<string> commonWords = {
+        "a", "i", "and", "the", "to", "for", "they", "as", "their",
+        "of", "on", "at", "is", "an", "with", "that", "by"
+    }; //same list from the index program
+    return commonWords.find(word) != commonWords.end();
+}
+
+string cleanWord(const string& word) {
+    string result;
+    for (char ch : word) {
+        if (isalnum(ch)) result += tolower(ch);
+    }
+    return (result.empty() || isCommonWord(result)) ? "" : result;
+}
+
+void buildInvertedIndex(const string& text) {
+    unordered_map<string, int> index;
+    istringstream iss(text);
+    string word;
+
+    while (iss >> word) {
+        string cleaned = cleanWord(word);
+        if (!cleaned.empty()) {
+            index[cleaned]++;
+        }
+    }
+
+    cout << "\nFrequency:\n";
+    for (const auto& pair : index) {
+        cout << pair.first << " (" << pair.second << ")\n";
+    }
+}
+
+int main() {
+    string text;
+    cout << "Enter text: ";
+    getline(cin, text);
+
+    unordered_map<char, int> freq;
+    for (char ch : text) {
+        freq[ch]++;
+    }
+
+    priority_queue<Node*, vector<Node*>, Compare> pq;
+    for (auto pair : freq) {
+        pq.push(new Node(pair.first, pair.second));
+    }
+
+    while (pq.size() > 1) {
+        Node* left = pq.top(); pq.pop();
+        Node* right = pq.top(); pq.pop();
+        Node* parent = new Node('\0', left->freq + right->freq);
+        parent->left = left;
+        parent->right = right;
+        pq.push(parent);
+    }
+
+    Node* root = pq.top();
+    unordered_map<char, string> codeMap;
+    makeCodes(root, "", codeMap);
+
+    cout << "\n Code:\n";
+    for (auto pair : codeMap) {
+        cout << "'" << pair.first << "' = " << pair.second << endl;
+    }
+
+    string compressed = "";
+    for (char ch : text) {
+        compressed += codeMap[ch];
+    }
+
+    cout << "\nBinary string:\n" << compressed << endl;
+
+    string currentCode = "", original = "";
+    unordered_map<string, char> reverseMap;
+    for (auto pair : codeMap) {
+        reverseMap[pair.second] = pair.first;
+    }
+
+    for (char bit : compressed) {
+        currentCode += bit;
+        if (reverseMap.count(currentCode)) {
+            original += reverseMap[currentCode];
+            currentCode = "";
+        }
+    }
+
+    cout << "\nDecompressed:\n" << original << endl;
+
+    deleteTree(root);
+
+    buildInvertedIndex(text);
+
+    return 0;
+}
