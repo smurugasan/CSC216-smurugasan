@@ -1,0 +1,229 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ctime>
+#include <sstream>
+#include <openssl/sha.h>
+using namespace std;
+
+// block class 
+class Block {
+public:
+    int index;
+    string timestamp;
+    vector<string> transactions;
+    int proof;
+    string previous_hash;
+
+    Block(int idx, string ts, vector<string> txns, int prf, string prev_hash)
+        : index(idx), timestamp(ts), transactions(txns), proof(prf), previous_hash(prev_hash) {}
+
+    // hash function 
+    string hashBlock() {
+        stringstream ss;
+        ss << index << timestamp;
+        for (const string& txn : transactions) {
+            ss << txn;
+        }
+        ss << proof << previous_hash;
+
+        string block_data = ss.str();
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        SHA256_CTX sha256_ctx;
+        SHA256_Init(&sha256_ctx);
+        SHA256_Update(&sha256_ctx, block_data.c_str(), block_data.length());
+        SHA256_Final(hash, &sha256_ctx);
+
+        stringstream hex_hash;
+        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+            hex_hash << hex << (int)hash[i];
+        }
+
+        return hex_hash.str();
+    }
+};
+
+// crypto coin class
+class SanjCoin {
+public:
+    vector<Block> chain;
+    vector<string> current_transactions;
+    int current_proof = 100;
+
+    SanjCoin() {
+        vector<string> txns = {"Genesis Block"};
+        Block genesis(0, getCurrentTime(), txns, current_proof, "0");
+        chain.push_back(genesis);
+    }
+
+    string getCurrentTime() {
+        time_t now = time(0);
+        return string(ctime(&now));
+    }
+
+    Block createNewBlock() {
+        int index = chain.size();
+        vector<string> txns = current_transactions;
+        string prev_hash = chain.back().hashBlock();
+        int proof = current_proof;
+        string timestamp = getCurrentTime();
+
+        Block newBlock(index, timestamp, txns, proof, prev_hash);
+        return newBlock;
+    }
+
+    void addTransaction(string transaction) {
+        current_transactions.push_back(transaction);
+    }
+
+    void mineBlock() {
+        Block newBlock = createNewBlock();
+        chain.push_back(newBlock);
+        current_transactions.clear();
+        current_proof++;
+    }
+
+    void printBlockchain() {
+        for (const Block& blk : chain) {
+            cout << "Block #" << blk.index << " - " << blk.timestamp << " - Hash: " << blk.hashBlock() << endl;
+        }
+    }
+};
+
+// transaction class
+class Transaction {
+public:
+    string sender;
+    string receiver;
+    double amount;
+    string signature;
+
+    Transaction(string sndr, string rcvr, double amt)
+        : sender(sndr), receiver(rcvr), amount(amt) {}
+
+    string transactionHash() const {
+        stringstream ss;
+        ss << sender << receiver << amount;
+        return ss.str();
+    }
+
+    void signTransaction(const string& privateKey) {
+        this->signature = "mock-signature-" + transactionHash();  
+    }
+
+    bool isValid() const {
+        return !signature.empty();
+    }
+};
+
+// wallet class 
+class Wallet {
+public:
+    string publicKey;
+    string privateKey;
+
+    Wallet() {
+        generateKeys();
+    }
+
+    void generateKeys() {
+        publicKey = "mock-public-key";
+        privateKey = "mock-private-key";
+    }
+
+    void signTransaction(Transaction& txn) {
+        txn.signTransaction(privateKey);
+    }
+};
+
+// peer class 
+class Peer {
+public:
+    string name;
+    SanjCoin sanjCoin;
+
+    Peer(string n) : name(n) {}
+
+    void syncBlockchainWithPeer(Peer& otherPeer) {
+        cout << name << " is syncing with " << otherPeer.name << "'s blockchain..." << endl;
+        if (otherPeer.sanjCoin.chain.size() > sanjCoin.chain.size()) {
+            sanjCoin = otherPeer.sanjCoin;
+            cout << "Sync successful." << endl;
+        } else {
+            cout << "Blockchain is already up to date." << endl;
+        }
+    }
+};
+
+// main
+int main() {
+    // initialize blockchain
+    SanjCoin mySanjCoin;
+
+    // wallet for Sanjay
+    Wallet sanjayWallet;
+    cout << "Sanjay's Public Key: " << sanjayWallet.publicKey << endl;
+    cout << "Sanjay's Private Key: " << sanjayWallet.privateKey << endl;
+
+    // peers
+    Peer peer1("Peer 1");
+    Peer peer2("Peer 2");
+
+    int choice;
+
+    while (true) {
+        cout << "\n===== SanjCoin Blockchain Menu =====" << endl;
+        cout << "1. Create a new transaction" << endl;
+        cout << "2. Mine a new block" << endl;
+        cout << "3. Display Blockchain" << endl;
+        cout << "4. Sync Peer 1 with Peer 2" << endl;
+        cout << "5. Sync Peer 2 with Peer 1" << endl;
+        cout << "6. Exit" << endl;
+
+        cout << "Choose an option: ";
+        cin >> choice;
+
+        if (choice == 1) {
+            string sender, receiver;
+            double amount;
+
+            cout << "Enter sender's public key: ";
+            cin >> sender;
+            cout << "Enter receiver's public key: ";
+            cin >> receiver;
+            cout << "Enter amount to transfer: ";
+            cin >> amount;
+
+            Transaction txn(sender, receiver, amount);
+            cout << "Transaction created: " << txn.transactionHash() << endl;
+
+            // sign transaction
+            sanjayWallet.signTransaction(txn);
+
+            // the transaction for the blockchain
+            mySanjCoin.addTransaction(txn.transactionHash());
+        }
+        else if (choice == 2) {
+            mySanjCoin.mineBlock();
+            cout << "Block mined" << endl;
+        }
+        else if (choice == 3) {
+            cout << "\nDisplaying SanjCoin Blockchain:" << endl;
+            mySanjCoin.printBlockchain();
+        }
+        else if (choice == 4) {
+            peer1.syncBlockchainWithPeer(peer2);
+        }
+        else if (choice == 5) {
+            peer2.syncBlockchainWithPeer(peer1);
+        }
+        else if (choice == 6) {
+            cout << "Closing Menu" << endl;
+            break;
+        } else {
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    }
+
+    return 0;
+}
